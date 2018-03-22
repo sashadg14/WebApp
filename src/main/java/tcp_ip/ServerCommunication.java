@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import tcp_ip.channels.AbstractSocket;
+import tcp_ip.client.Agent;
+import tcp_ip.client.User;
 
 import java.io.IOException;
 
@@ -20,7 +22,6 @@ public class ServerCommunication {
     private Logger logger = Logger.getRootLogger();
 
 
-
     /*private static ServerCommunication serverCommunication=new ServerCommunication();
     private ServerCommunication() {
     }
@@ -31,22 +32,29 @@ public class ServerCommunication {
 
     public void handleRegistration(AbstractSocket userChannel, String message) throws IOException {
         String name = mUtils.getNameFromMessage(message);
-        if (allClientsBase.isAutorized(userChannel, name)) {
+        if (allClientsBase.isAutorized(userChannel)) {
            userChannel.sendMessage( Constants.ERROR_ALREADY_REGISTRED);
-            return;
+           return;
         }
         if (mUtils.isSignInUserMessage(message)) {
-           userChannel.sendMessage( Constants.SUCCESS_REGISTRED);
+           handleUserRegistration(userChannel,name);
+        } else if (mUtils.isSignInAgentMessage(message)) {
+            handleAgentRegistration(userChannel,name);
+        }
+    }
+
+    public void handleUserRegistration(AbstractSocket userChannel, String name) throws IOException {
+            userChannel.sendMessage( Constants.SUCCESS_REGISTRED);
             allClientsBase.addNewUser(userChannel, name);
             logger.log(Level.INFO, "Registered user " + name);
-            //System.out.println("user");
-        } else if (mUtils.isSignInAgentMessage(message)) {
-           userChannel.sendMessage( Constants.SUCCESS_REGISTRED + "\n");
+    }
+
+    public void handleAgentRegistration(AbstractSocket userChannel, String name) throws IOException {
+            userChannel.sendMessage( Constants.SUCCESS_REGISTRED);
             allClientsBase.addNewAgent(userChannel, name);
             tryToCreateNewPair();
             logger.log(Level.INFO, "Registered agent " + name);
             // System.out.println("agent");
-        }
     }
 
     public void handleMessagesFromAutorizedUser(AbstractSocket userChannel, String message) {
@@ -144,21 +152,21 @@ public class ServerCommunication {
 
     public void tryToCreateNewPair() {
       //  System.out.println("ds");
-        Pair<AbstractSocket, AbstractSocket> pair = allClientsBase.createNewPairOfUserAndAgent();
+        Pair<User, Agent> pair = allClientsBase.createNewPairOfUserAndAgent();
         if (pair != null) {
-            String userName = allClientsBase.getClientNameByChanel(pair.getKey());
-            String agentName = allClientsBase.getClientNameByChanel(pair.getValue());
+            String userName = allClientsBase.getClientNameByChanel(pair.getKey().getAbstractSocket());
+            String agentName = allClientsBase.getClientNameByChanel(pair.getValue().getAbstractSocket());
             logger.log(Level.INFO, "Created chat between " + userName + " and " + agentName);
             try {
-               pair.getKey().sendMessage( "your agent is " + allClientsBase.getClientNameByChanel(pair.getValue()));
+               pair.getKey().getAbstractSocket().sendMessage( "your agent is " + allClientsBase.getClientNameByChanel(pair.getValue().getAbstractSocket()));
             } catch (IOException e) {
-                handlingClientDisconnecting(pair.getKey());
+                handlingClientDisconnecting(pair.getKey().getAbstractSocket());
             }
             try {
-               pair.getValue().sendMessage( "your user is " + allClientsBase.getClientNameByChanel(pair.getKey()) + "\n");
-               pair.getValue().sendMessage( "user: " + usersSMSCache.removeCachedSMS(pair.getKey()));
+               pair.getValue().getAbstractSocket().sendMessage( "your user is " + allClientsBase.getClientNameByChanel(pair.getKey().getAbstractSocket()) + "\n");
+               pair.getValue().getAbstractSocket().sendMessage( "user: " + usersSMSCache.removeCachedSMS(pair.getKey().getAbstractSocket()));
             } catch (IOException e){
-                handlingClientDisconnecting(pair.getValue());
+                handlingClientDisconnecting(pair.getValue().getAbstractSocket());
             }
         }
     }

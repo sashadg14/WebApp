@@ -131,7 +131,7 @@ public class ServerConnection {
                 }
                 break;
             case Constants.MESSAGE_TYPE_SMS:
-                if (!allClientsBase.isAutorized(clientChannel, mUtils.getNameFromMessage(message))) {
+                if (!allClientsBase.isAutorized(clientChannel)) {
                     try {
                         sendMessageToClient(clientChannel, Constants.ERROR_NEED_REGISTERING);
                     } catch (IOException e) {

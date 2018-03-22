@@ -10,6 +10,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import tcp_ip.AllClientsBase;
+import tcp_ip.Constants;
 import tcp_ip.ServerCommunication;
 import tcp_ip.channels.WebSocket;
 
@@ -27,17 +28,17 @@ public class UsersSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message)
             throws Exception {
-
+        WebSocket webSocket=new WebSocket(session);
         // for(WebSocketSession webSocketSession : sessions) {
         Map value = new Gson().fromJson(message.getPayload(), Map.class);
         System.out.println(message.getPayload());
         if(value.containsKey("name")) {
             String name= (String) value.get("name");
-            //webSocketSession.sendMessage(new TextMessage("Hello agent " + value.get("name") + " !"));
-            allClientsBase.addNewUser(new WebSocket(session),name);
-            logger.log(Level.INFO, "Registered web user " + name);
+           serverCommunication.handleUserRegistration(webSocket,name);
         }
-        else serverCommunication.handleMessagesFromAutorizedUser(new WebSocket(session),value.get("message").toString());
+        else if(allClientsBase.isAutorized(webSocket))
+            serverCommunication.handleMessagesFromAutorizedUser(webSocket,value.get("message").toString());
+        else webSocket.sendMessage(Constants.ERROR_NEED_REGISTERING);
         //}
     }
 

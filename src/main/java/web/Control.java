@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class Control {
     @RequestMapping("/agent")
     public String index() {
-        System.out.println("asdsad");
+     //   System.out.println("asdsad");
         return "agent/user.html";
     }
 

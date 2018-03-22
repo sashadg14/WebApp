@@ -39,7 +39,7 @@ function insertChat(who, text, time) {
 
     if (who == "me") {
         control = '<li style="width:100%">' +
-            '<div class="msj macro">' +
+            '<div class="sendMessage macro">' +
             '<div class="avatar"><img class="img-circle" style="width:100%;" src="' + me.avatar + '" /></div>' +
             '<div class="text text-l">' +
             '<p>' + text + '</p>' +
@@ -49,7 +49,7 @@ function insertChat(who, text, time) {
             '</li>';
     } else {
         control = '<li style="width:100%;">' +
-            '<div class="msj-rta macro">' +
+            '<div class="sendMessage-rta macro">' +
             '<div class="text text-r">' +
             '<p>' + text + '</p>' +
             '<p><small>' + date + '</small></p>' +
