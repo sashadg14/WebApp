@@ -1,4 +1,4 @@
-package tcp_ip;
+package utils;
 
 import tcp_ip.channels.AbstractSocket;
 

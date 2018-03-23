@@ -1,16 +1,14 @@
 package web.sockethandlers;
 
 import com.google.gson.Gson;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import tcp_ip.AllClientsBase;
-import tcp_ip.Constants;
+import utils.Constants;
 import tcp_ip.ServerCommunication;
 import tcp_ip.channels.WebSocket;
 

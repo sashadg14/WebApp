@@ -4,11 +4,16 @@ import javafx.util.Pair;
 import tcp_ip.channels.AbstractSocket;
 import tcp_ip.channels.SChannel;
 import tcp_ip.client.Agent;
+import tcp_ip.client.Client;
 import tcp_ip.client.User;
 
 import javax.jws.soap.SOAPBinding;
+import javax.swing.event.CaretListener;
 import java.nio.channels.SocketChannel;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -142,12 +147,30 @@ public class AllClientsBase {
         return false;
     }
 
-    public AbstractSocket getClientInterlocutorChannel(AbstractSocket channel) {
+
+    public AbstractSocket getUserInterlocutorChannel(AbstractSocket channel) {
         for (Pair<User, Agent> pair : pairUserAgentList)
             if (pair.getKey().getAbstractSocket().equals(channel))
                 return pair.getValue().getAbstractSocket();
-            else if (pair.getValue().getAbstractSocket().equals(channel))
-                return pair.getKey().getAbstractSocket();
+        return null;
+    }
+    public List<User> getAgentInterlocutors(AbstractSocket channel) {
+        List<User> users=new LinkedList<>();
+        for (Pair<User, Agent> pair : pairUserAgentList)
+            if (pair.getValue().getAbstractSocket().equals(channel))
+                users.add(pair.getKey());
+        return users;
+    }
+
+
+
+    public Client getClientByChannel(AbstractSocket channel) {
+        for (User user : userList)
+            if (user.getAbstractSocket().equals(channel))
+                return user;
+        for (Agent agent: agentList)
+            if (agent.getAbstractSocket().equals(channel))
+                return agent;
         return null;
     }
 
@@ -175,7 +198,7 @@ public class AllClientsBase {
     public Pair<User, Agent> createNewPairOfUserAndAgent() {
         if (isSomeUsersWait() && isSomeAgentsFree()) {
             //first channel - user, second - agent channel
-            Pair<User, Agent> pair = new Pair<>(waitingUsersList.remove(0), freeArentsList.remove(0));
+            Pair<User, Agent> pair = new Pair<>(waitingUsersList.remove(0), freeArentsList.get(0));
             pairUserAgentList.add(pair);
             return pair;
         }

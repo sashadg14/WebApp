@@ -2,7 +2,7 @@ package tcp_ip.client;
 
 import tcp_ip.channels.AbstractSocket;
 
-public class Agent {
+public class Agent implements Client{
     private long id;
     private AbstractSocket abstractSocket;
     private String name;

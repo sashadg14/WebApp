@@ -1,4 +1,4 @@
-package tcp_ip;
+package utils;
 
 /**
  * Created by Alex on 15.02.2018.
@@ -45,5 +45,12 @@ public class MessagesUtils {
         else if(isLeaveMessage(message))
             return Constants.MESSAGE_TYPE_LEAVE;
         else return Constants.MESSAGE_TYPE_SMS;
+    }
+
+    public String createMessageToAgent(String message, long userId){
+        return "{ \"id\":"+userId+", \"message\":\""+message+"\"}";
+    }
+    public String createInitialMessageToAgent(String userName, long userId){
+        return "{ \"id\":"+userId+", \"userName\":\""+userName+"\"}";
     }
 }

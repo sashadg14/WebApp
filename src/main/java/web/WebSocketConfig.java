@@ -1,10 +1,7 @@
 package web;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import tcp_ip.AllClientsBase;
-import tcp_ip.Constants;
 import tcp_ip.ServerCommunication;
 import tcp_ip.ServerConnection;
 import web.sockethandlers.AgentSocketHandler;

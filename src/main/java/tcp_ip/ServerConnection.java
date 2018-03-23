@@ -3,10 +3,10 @@ package tcp_ip;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 import tcp_ip.channels.AbstractSocket;
 import tcp_ip.channels.SChannel;
+import utils.Constants;
+import utils.MessagesUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -146,11 +146,11 @@ public class ServerConnection {
             case Constants.MESSAGE_TYPE_LEAVE:
                 if (allClientsBase.doesClientHaveInterlocutor(clientChannel) && allClientsBase.doesItsUserChannel(clientChannel)) {
                     try {
-                        sendMessageToClient(allClientsBase.getClientInterlocutorChannel(clientChannel), "user leave from dialog\n");
+                        sendMessageToClient(allClientsBase.getUserInterlocutorChannel(clientChannel), "user leave from dialog\n");
                     } catch (IOException e) {
-                        serverCommunication.handlingClientDisconnecting(allClientsBase.getClientInterlocutorChannel(clientChannel));
+                        serverCommunication.handlingClientDisconnecting(allClientsBase.getUserInterlocutorChannel(clientChannel));
                     }
-                    String agentName = allClientsBase.getClientNameByChanel(allClientsBase.getClientInterlocutorChannel(clientChannel));
+                    String agentName = allClientsBase.getClientNameByChanel(allClientsBase.getUserInterlocutorChannel(clientChannel));
                     allClientsBase.breakChatBetweenUserAndAgent(clientChannel);
                     logger.log(Level.INFO, "user " + allClientsBase.getClientNameByChanel(clientChannel) + " leave from dialog with " + agentName);
                 }

@@ -1,7 +1,4 @@
-package tcp_ip;
-
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+package utils;
 
 /**
  * Created by Alex on 15.02.2018.
