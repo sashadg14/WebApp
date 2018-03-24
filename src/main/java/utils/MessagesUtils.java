@@ -51,6 +51,6 @@ public class MessagesUtils {
         return "{ \"id\":"+userId+", \"message\":\""+message+"\"}";
     }
     public String createInitialMessageToAgent(String userName, long userId){
-        return "{ \"id\":"+userId+", \"userName\":\""+userName+"\"}";
+        return "{ \"id\":"+userId+", \"newUserName\":\""+userName+"\"}";
     }
 }

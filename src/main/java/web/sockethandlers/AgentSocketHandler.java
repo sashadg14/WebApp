@@ -26,7 +26,6 @@ public class AgentSocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message)
             throws Exception {
         WebSocket webSocket=new WebSocket(session);
-
        // for(WebSocketSession webSocketSession : sessions) {
             Map value = new Gson().fromJson(message.getPayload(), Map.class);
             System.out.println(message.getPayload());

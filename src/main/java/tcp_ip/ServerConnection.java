@@ -146,7 +146,7 @@ public class ServerConnection {
             case Constants.MESSAGE_TYPE_LEAVE:
                 if (allClientsBase.doesClientHaveInterlocutor(clientChannel) && allClientsBase.doesItsUserChannel(clientChannel)) {
                     try {
-                        sendMessageToClient(allClientsBase.getUserInterlocutorChannel(clientChannel), "user leave from dialog\n");
+                        sendMessageToClient(allClientsBase.getUserInterlocutorChannel(clientChannel), "{ \"disconnected\":" + allClientsBase.getClientByChannel(clientChannel).getId() + "}");
                     } catch (IOException e) {
                         serverCommunication.handlingClientDisconnecting(allClientsBase.getUserInterlocutorChannel(clientChannel));
                     }

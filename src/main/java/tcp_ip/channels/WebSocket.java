@@ -16,6 +16,7 @@ public class WebSocket implements AbstractSocket{
 
     @Override
     public void sendMessage(String message) throws IOException {
+      //  System.out.println(message+" ->>>>>>");
         webSocketSession.sendMessage(new TextMessage(message));
     }
 

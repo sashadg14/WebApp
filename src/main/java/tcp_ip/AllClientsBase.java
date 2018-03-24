@@ -7,8 +7,6 @@ import tcp_ip.client.Agent;
 import tcp_ip.client.Client;
 import tcp_ip.client.User;
 
-import javax.jws.soap.SOAPBinding;
-import javax.swing.event.CaretListener;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.Iterator;
@@ -34,10 +32,11 @@ public class AllClientsBase {
 
     private AtomicLong atomicLong;
 
-    public AllClientsBase() {
+    public AllClientsBase  () {
         atomicLong = new AtomicLong();
     }
 
+    public int maxUsersInDialog=2;
     ;
     /*
     private static AllClientsBase allClientsBase=new AllClientsBase();
@@ -53,6 +52,9 @@ public class AllClientsBase {
 
     public void addUserChannelInWaiting(AbstractSocket channel) {
         // System.out.println(getClientNameByChanel(channel)+"========================================");
+        for (User user : waitingUsersList)
+            if (user.getAbstractSocket().equals(channel))
+                return;
         for (User user : userList)
             if (user.getAbstractSocket().equals(channel))
                 waitingUsersList.add(user);
@@ -62,7 +64,7 @@ public class AllClientsBase {
     public void addNewAgent(AbstractSocket channel, String name) {
         Agent agent = new Agent(atomicLong.getAndIncrement(), channel, name);
         agentList.add(agent);
-        freeArentsList.add(agent);
+        addAgentInFree(agent);
         //serverCommunication.tryToCreateNewPair();
     }
 
@@ -111,23 +113,26 @@ public class AllClientsBase {
         while (pairIterator.hasNext()) {
             Pair<User, Agent> pair = pairIterator.next();
             if (pair.getKey().getAbstractSocket().equals(userChannel)) {
-                freeArentsList.add(pair.getValue());
+                addAgentInFree(pair.getValue());
                 pairIterator.remove();
                 break;
             }
         }
     }
 
+    private void addAgentInFree(Agent agent) {
+        for (Agent a : freeArentsList)
+            if (a.equals(agent))
+                return;
+        freeArentsList.add(agent);
+        if(agent.getUsersCount().get()==maxUsersInDialog)
+            agent.getUsersCount().decrementAndGet();
+    }
+
     public void breakChatBetweenAgentAndUser(AbstractSocket agentChannel) {
-        Iterator<Pair<User, Agent>> pairIterator = pairUserAgentList.iterator();
-        while (pairIterator.hasNext()) {
-            Pair<User, Agent> pair = pairIterator.next();
-            if (pair.getValue().getAbstractSocket().equals(agentChannel)) {
-                freeArentsList.add(pair.getValue());
-                pairIterator.remove();
-                break;
-            }
-        }
+        //addAgentInFree(pair.getValue());
+        // break;
+        pairUserAgentList.removeIf(pair -> pair.getValue().getAbstractSocket().equals(agentChannel));
 
     }
 
@@ -154,8 +159,9 @@ public class AllClientsBase {
                 return pair.getValue().getAbstractSocket();
         return null;
     }
+
     public List<User> getAgentInterlocutors(AbstractSocket channel) {
-        List<User> users=new LinkedList<>();
+        List<User> users = new LinkedList<>();
         for (Pair<User, Agent> pair : pairUserAgentList)
             if (pair.getValue().getAbstractSocket().equals(channel))
                 users.add(pair.getKey());
@@ -163,12 +169,11 @@ public class AllClientsBase {
     }
 
 
-
     public Client getClientByChannel(AbstractSocket channel) {
         for (User user : userList)
             if (user.getAbstractSocket().equals(channel))
                 return user;
-        for (Agent agent: agentList)
+        for (Agent agent : agentList)
             if (agent.getAbstractSocket().equals(channel))
                 return agent;
         return null;
@@ -176,40 +181,60 @@ public class AllClientsBase {
 
     public void removeUserChanelFromBase(AbstractSocket userChannel) {
         for (User user : waitingUsersList)
-            if (user.getAbstractSocket().equals(userChannel))
+            if (user.getAbstractSocket().equals(userChannel)) {
                 waitingUsersList.remove(user);
+                break;
+            }
         //if (userList.containsKey(userChannel))
         for (User user : userList)
-            if (user.getAbstractSocket().equals(userChannel))
+            if (user.getAbstractSocket().equals(userChannel)) {
                 userList.remove(user);
+                break;
+            }
     }
 
     public void removeAgentChanelFromBase(AbstractSocket agentChannel) {
-        for (Agent agent : freeArentsList) {
-            if (agent.getAbstractSocket().equals(agentChannel))
-                freeArentsList.remove(agent);
-        }
-        for (Agent agent : agentList) {
-            if (agent.getAbstractSocket().equals(agentChannel))
+        Iterator<Agent> iterator = freeArentsList.iterator();
+        while (iterator.hasNext())
+            if (iterator.next().getAbstractSocket().equals(agentChannel))
+                iterator.remove();
+        for(Agent agent:agentList)
+            if (agent.getAbstractSocket().equals(agentChannel)) {
                 agentList.remove(agent);
-        }
+                break;
+            }
     }
 
     public Pair<User, Agent> createNewPairOfUserAndAgent() {
         if (isSomeUsersWait() && isSomeAgentsFree()) {
             //first channel - user, second - agent channel
-            Pair<User, Agent> pair = new Pair<>(waitingUsersList.remove(0), freeArentsList.get(0));
-            pairUserAgentList.add(pair);
+            Pair<User, Agent> pair = null;
+            for (Agent agent : freeArentsList)
+                if (agent.getAbstractSocket() instanceof SChannel) {
+                    pair = new Pair<>(waitingUsersList.remove(0), agent);
+                    freeArentsList.remove(agent);
+                    pairUserAgentList.add(pair);
+                    break;
+                } else if (agent.getUsersCount().get() < maxUsersInDialog+1) {
+                    pair = new Pair<>(waitingUsersList.remove(0), agent);
+                    agent.getUsersCount().incrementAndGet();
+                    pairUserAgentList.add(pair);
+                    if (agent.getUsersCount().get() == maxUsersInDialog)
+                        freeArentsList.remove(agent);
+                    break;
+                }
             return pair;
         }
         return null;
     }
 
     private boolean isSomeUsersWait() {
+        System.out.println(waitingUsersList.size());
         return waitingUsersList.size() != 0;
     }
 
     private boolean isSomeAgentsFree() {
+        System.out.println(freeArentsList.size());
         return freeArentsList.size() != 0;
     }
 
